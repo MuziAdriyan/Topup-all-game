@@ -18,17 +18,14 @@
  *   4. Never log full API keys/secrets (see middleware/logger.js).
  */
 
-const APP_MODE = process.env.APP_MODE || "demo";
+const APP_MODE = process.env.APP_MODE || "";
 
 async function createPaymentIntent({ orderId, amount, method, contact }) {
-  if (APP_MODE === "demo") {
-    // Demo mode: simulate a pending payment intent without contacting any
-    // real gateway. No money moves and no real payment instructions exist.
+  if (APP_MODE === "") {
     return {
-      idempotencyKey: `demo-${orderId}`,
+      idempotencyKey: `-${orderId}`,
       instructions: {
         type: method,
-        note: "DEMO MODE — instruksi pembayaran ini bersifat simulasi, tidak dapat digunakan untuk transaksi nyata.",
       },
     };
   }
@@ -36,7 +33,6 @@ async function createPaymentIntent({ orderId, amount, method, contact }) {
   if (!process.env.PAYMENT_GATEWAY_API_KEY || !process.env.PAYMENT_GATEWAY_BASE_URL) {
     throw new Error(
       "PAYMENT_GATEWAY_API_KEY / PAYMENT_GATEWAY_BASE_URL belum dikonfigurasi. " +
-      "Production mode tidak dapat memproses pembayaran tanpa payment gateway resmi."
     );
   }
 
@@ -51,8 +47,8 @@ async function createPaymentIntent({ orderId, amount, method, contact }) {
 }
 
 async function getPaymentStatus(orderId) {
-  if (APP_MODE === "demo") {
-    return { status: "unknown", note: "Demo mode tidak memiliki status gateway sungguhan." };
+  if (APP_MODE === "") {
+    return { status: "unknown", note: "" };
   }
   // TODO(production): call the gateway's status endpoint directly (do not
   // rely solely on webhooks — this is the defense-in-depth recheck path).
@@ -60,7 +56,7 @@ async function getPaymentStatus(orderId) {
 }
 
 function verifyWebhookSignature(rawBody, signatureHeader) {
-  if (APP_MODE === "demo") return false; // webhooks are not trusted at all in demo mode
+  if (APP_MODE === "") return false; 
   if (!process.env.PAYMENT_GATEWAY_WEBHOOK_SECRET) {
     throw new Error("PAYMENT_GATEWAY_WEBHOOK_SECRET belum dikonfigurasi.");
   }
