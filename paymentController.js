@@ -2,7 +2,7 @@ const { AppError } = require("../middleware/errorHandler");
 const { logTransactionEvent } = require("../middleware/logger");
 const paymentGatewayService = require("../services/paymentGatewayService");
 const topupApiService = require("../services/topupApiService");
-const { _demoOrders: demoOrders } = require("./orderController");
+const { _Orders: Orders } = require("./orderController");
 
 /**
  * POST /api/payments/webhook
@@ -27,7 +27,7 @@ async function handleWebhook(req, res, next) {
     }
 
     const { orderId, paymentStatus, paymentId } = req.body;
-    const order = demoOrders.get(orderId);
+    const order = Orders.get(orderId);
     if (!order) throw new AppError("Order tidak ditemukan untuk webhook ini.", 404, "NOT_FOUND");
 
     // Idempotency guard — a real implementation checks a unique constraint
@@ -70,7 +70,7 @@ async function handleWebhook(req, res, next) {
  */
 async function checkPaymentStatus(req, res, next) {
   try {
-    const order = demoOrders.get(req.params.orderId);
+    const order = Orders.get(req.params.orderId);
     if (!order) throw new AppError("Pesanan tidak ditemukan.", 404, "NOT_FOUND");
 
     const gatewayStatus = await paymentGatewayService.getPaymentStatus(order.orderId);
