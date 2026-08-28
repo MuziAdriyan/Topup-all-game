@@ -8,7 +8,7 @@ const { getProductPrice } = require("../services/catalogService");
  * tables in production — this object is NOT persistent and NOT safe for
  * concurrent instances.
  */
-const demoOrders = new Map();
+const Orders = new Map();
 
 function generateOrderId() {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -87,7 +87,7 @@ async function createOrder(req, res, next) {
 async function getOrderStatus(req, res, next) {
   try {
     // TODO(production): SELECT status, game, product, total FROM orders WHERE order_id = ?
-    const order = demoOrders.get(req.params.orderId);
+    const order = Orders.get(req.params.orderId);
     if (!order) throw new AppError("Pesanan tidak ditemukan.", 404, "NOT_FOUND");
 
     res.json({
