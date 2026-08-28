@@ -8,7 +8,7 @@
    See backend/controllers/orderController.js.
    ========================================================= */
 
-const APP_MODE = "demo"; // "demo" | "production" — toggled by deployment config, not by the user.
+const APP = "";  | "production" — toggled by deployment config, not by the user.
 
 /* ---------- Mobile nav drawer ---------- */
 (function initDrawer() {
@@ -44,9 +44,9 @@ const CATALOG = {
   ]},
   "free-fire": { name: "Free Fire", hasServer: false, items: [
     { label: "70 Diamond", sub: "Instan", price: 11000 },
-    { label: "140 Diamond", sub: "Instan", price: 22000 },
-    { label: "355 Diamond", sub: "Instan", price: 55000, bonus: "+15" },
-    { label: "720 Diamond", sub: "Instan", price: 108000 },
+    { label: "140 Diamond", sub: "Instan", price: 19000 },
+    { label: "355 Diamond", sub: "Instan", price: 49000, bonus: "+15" },
+    { label: "720 Diamond", sub: "Instan", price: 100000 },
   ]},
   "pubg-mobile": { name: "PUBG Mobile", hasServer: false, items: [
     { label: "60 UC", sub: "Instan", price: 15000 },
@@ -96,9 +96,7 @@ const rupiah = (n) => "Rp " + n.toLocaleString("id-ID");
   const nominalGrid = document.getElementById("nominalGrid");
   const stepEls = document.querySelectorAll(".step-nav .step");
   document.getElementById("modeLabel").textContent =
-    APP_MODE === "demo"
-      ? "Mode: Demo (pengujian, tanpa pembayaran nyata)"
-      : "Mode: Production";
+    APP === 
 
   let selectedNominal = null;
 
@@ -213,7 +211,7 @@ const rupiah = (n) => "Rp " + n.toLocaleString("id-ID");
 
     if (!valid) return;
 
-    // ---- DEMO MODE ONLY ----
+    // ---- MODE ONLY ----
     // Production build must POST this payload to /api/orders and let the
     // backend create the order + payment intent. The price used for the
     // real charge must always come from the backend catalog lookup, never
@@ -240,19 +238,19 @@ const rupiah = (n) => "Rp " + n.toLocaleString("id-ID");
   });
 })();
 
-/* ---------- Demo order storage helpers (client-side only) ---------- */
+/* ---------- order storage helpers (client-side only) ---------- */
 function saveOrder(order) {
   const all = JSON.parse(localStorage.getItem("gdevshop_demo_orders") || "{}");
   all[order.orderId] = order;
   localStorage.setItem("gdevshop_demo_orders", JSON.stringify(all));
 }
 function getOrder(orderId) {
-  const all = JSON.parse(localStorage.getItem("gdevshop_demo_orders") || "{}");
+  const all = JSON.parse(localStorage.getItem("Muzishop_orders") || "{}");
   return all[orderId] || null;
 }
 function updateOrderStatus(orderId, status) {
-  const all = JSON.parse(localStorage.getItem("gdevshop_demo_orders") || "{}");
-  if (all[orderId]) { all[orderId].status = status; localStorage.setItem("gdevshop_demo_orders", JSON.stringify(all)); }
+  const all = JSON.parse(localStorage.getItem("Muzishop_orders") || "{}");
+  if (all[orderId]) { all[orderId].status = status; localStorage.setItem("Muzishop_orders", JSON.stringify(all)); }
 }
 
 /* ---------- Checkout page ---------- */
@@ -276,7 +274,6 @@ function updateOrderStatus(orderId, status) {
   document.getElementById("coPayment").textContent = order.payment.toUpperCase();
   document.getElementById("coTotal").textContent = rupiah(order.total);
 
-  document.getElementById("demoNotice").style.display = order.mode === "demo" ? "block" : "none";
 
   document.getElementById("simulatePay").addEventListener("click", () => {
     // DEMO ONLY: simulates the webhook confirmation a real payment
