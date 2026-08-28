@@ -1,8 +1,8 @@
 const { AppError } = require("../middleware/errorHandler");
-const { _demoOrders: demoOrders } = require("./orderController");
+const { _demoOrders: Orders } = require("./orderController");
 
 /**
- * All handlers below use the in-memory demo store as a placeholder.
+ * All handlers below use the in-memory store as a placeholder.
  * Production implementation should query the database directly
  * (see database/schema.sql) with proper pagination.
  */
@@ -30,7 +30,7 @@ async function listOrders(req, res, next) {
 
 async function getOrderDetail(req, res, next) {
   try {
-    const order = demoOrders.get(req.params.orderId);
+    const order = Orders.get(req.params.orderId);
     if (!order) throw new AppError("Pesanan tidak ditemukan.", 404, "NOT_FOUND");
     res.json({ data: order });
   } catch (err) { next(err); }
