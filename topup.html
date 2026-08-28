@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top Up Game — GDevShop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01M8 6h8a4 4 0 0 1 4 4v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-4a4 4 0 0 1 4-4Z"/></svg></span>
+      <span class="brand-name">GDev<span>Shop</span></span>
+    </a>
+    <div class="navsearch">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" placeholder="Cari game atau produk...">
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#promo">Promo</a>
+      <a href="index.html#layanan" class="active">Layanan</a>
+      <a href="status.html">Cek Pesanan</a>
+    </nav>
+    <div class="nav-auth">
+      <a href="#" class="btn btn-ghost btn-sm">Login</a>
+      <a href="#" class="btn btn-primary btn-sm">Register</a>
+    </div>
+    <button class="nav-toggle" aria-label="Buka menu" id="navToggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="mobile-drawer-panel">
+    <button class="mobile-drawer-close" id="drawerClose" aria-label="Tutup menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <a href="index.html">Home</a>
+    <a href="index.html#promo">Promo</a>
+    <a href="index.html#layanan">Layanan</a>
+    <a href="status.html">Cek Pesanan</a>
+  </div>
+</div>
+
+<section class="section" style="padding-top:40px;">
+  <div class="container">
+
+    <span class="mode-toggle"><span class="active-demo" id="modeLabel">Mode: Demo (pengujian, tanpa pembayaran nyata)</span></span>
+
+    <div class="step-nav">
+      <span class="step active" data-step="1">1. Pilih Game</span><span class="sep">›</span>
+      <span class="step" data-step="2">2. Detail Akun</span><span class="sep">›</span>
+      <span class="step" data-step="3">3. Nominal</span><span class="sep">›</span>
+      <span class="step" data-step="4">4. Pembayaran</span><span class="sep">›</span>
+      <span class="step" data-step="5">5. Ringkasan</span>
+    </div>
+
+    <div class="topup-layout">
+      <form class="panel form-panel" id="topupForm" novalidate>
+
+        <!-- 1. PILIH GAME -->
+        <div class="form-block">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01M8 6h8a4 4 0 0 1 4 4v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-4a4 4 0 0 1 4-4Z"/></svg>Pilih Game</h3>
+          <div class="field">
+            <label for="gameSelect">Game</label>
+            <select id="gameSelect" required>
+              <option value="">-- Pilih game --</option>
+              <option value="mobile-legends" data-server="1">Mobile Legends</option>
+              <option value="free-fire" data-server="0">Free Fire</option>
+              <option value="pubg-mobile" data-server="0">PUBG Mobile</option>
+              <option value="valorant" data-server="0">Valorant</option>
+              <option value="roblox" data-server="0">Roblox</option>
+              <option value="genshin-impact" data-server="1">Genshin Impact</option>
+              <option value="honor-of-kings" data-server="1">Honor of Kings</option>
+              <option value="cod-mobile" data-server="0">Call of Duty Mobile</option>
+            </select>
+            <span class="error-msg">Pilih game terlebih dahulu.</span>
+          </div>
+        </div>
+
+        <!-- 2. DETAIL AKUN -->
+        <div class="form-block">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>Detail Akun</h3>
+          <div class="field-row">
+            <div class="field" id="playerIdField">
+              <label for="playerId">Player ID</label>
+              <input type="text" id="playerId" inputmode="numeric" placeholder="Contoh: 123456789" required>
+              <span class="error-msg">Player ID wajib diisi (angka saja).</span>
+            </div>
+            <div class="field" id="serverIdField" style="display:none;">
+              <label for="serverId">Server ID</label>
+              <input type="text" id="serverId" inputmode="numeric" placeholder="Contoh: 2001">
+              <span class="error-msg">Server ID wajib diisi untuk game ini.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. NOMINAL -->
+        <div class="form-block">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Pilih Nominal</h3>
+          <div class="nominal-grid" id="nominalGrid" role="radiogroup" aria-label="Pilih nominal top up">
+            <!-- populated by script.js -->
+          </div>
+          <span class="error-msg" id="nominalError" style="display:none; margin-top:8px;">Pilih nominal top up.</span>
+        </div>
+
+        <!-- 4. PEMBAYARAN -->
+        <div class="form-block">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Metode Pembayaran</h3>
+          <div class="payment-grid" role="radiogroup" aria-label="Pilih metode pembayaran">
+            <label class="option-card"><input type="radio" name="payment" value="qris"><span class="label">QRIS</span><span class="sub">Semua e-wallet & bank</span></label>
+            <label class="option-card"><input type="radio" name="payment" value="va-bca"><span class="label">VA BCA</span><span class="sub">Virtual Account</span></label>
+            <label class="option-card"><input type="radio" name="payment" value="va-bni"><span class="label">VA BNI</span><span class="sub">Virtual Account</span></label>
+            <label class="option-card"><input type="radio" name="payment" value="ovo"><span class="label">OVO</span><span class="sub">E-wallet</span></label>
+            <label class="option-card"><input type="radio" name="payment" value="dana"><span class="label">DANA</span><span class="sub">E-wallet</span></label>
+            <label class="option-card"><input type="radio" name="payment" value="gopay"><span class="label">GoPay</span><span class="sub">E-wallet</span></label>
+          </div>
+          <span class="error-msg" id="paymentError" style="display:none; margin-top:8px;">Pilih metode pembayaran.</span>
+        </div>
+
+        <!-- 5. KONTAK -->
+        <div class="form-block">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>Kontak untuk Notifikasi</h3>
+          <div class="field">
+            <label for="contact">Email atau Nomor WhatsApp</label>
+            <input type="text" id="contact" placeholder="nama@email.com atau 08xxxxxxxxxx" required>
+            <span class="error-msg">Masukkan email atau nomor kontak yang valid.</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitOrder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Bayar Sekarang
+        </button>
+      </form>
+
+      <!-- RINGKASAN -->
+      <aside class="panel summary-panel">
+        <h3>Ringkasan Pesanan</h3>
+        <div class="summary-row"><span>Game</span><b id="sumGame">—</b></div>
+        <div class="summary-row"><span>Player ID</span><b id="sumPlayer">—</b></div>
+        <div class="summary-row"><span>Nominal</span><b id="sumNominal">—</b></div>
+        <div class="summary-row"><span>Metode Bayar</span><b id="sumPayment">—</b></div>
+        <div class="summary-row"><span>Biaya Layanan</span><b id="sumFee">Rp 0</b></div>
+        <div class="summary-total"><span>Total</span><span class="amount" id="sumTotal">Rp 0</span></div>
+        <p style="font-size:12px; color:var(--text-faint); margin-top:14px;">Harga akhir tetap diverifikasi ulang oleh sistem sebelum pembayaran diproses.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container footer-bottom">
+    <span>© 2026 GDevShop. Seluruh hak cipta dilindungi.</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
