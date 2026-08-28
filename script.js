@@ -1,5 +1,5 @@
 /* =========================================================
-   GDevShop — Frontend logic
+   MuziShop — Frontend logic
    NOTE: This file only handles DEMO MODE order simulation and
    UI/UX. In PRODUCTION MODE, the "Bayar Sekarang" submit must
    call the backend API (POST /api/orders) instead of writing
@@ -8,7 +8,7 @@
    See backend/controllers/orderController.js.
    ========================================================= */
 
-const APP = "";  | "production" — toggled by deployment config, not by the user.
+const APP_MODE = "demo"; // "demo" | "production" — toggled by deployment config, not by the user.
 
 /* ---------- Mobile nav drawer ---------- */
 (function initDrawer() {
@@ -44,9 +44,9 @@ const CATALOG = {
   ]},
   "free-fire": { name: "Free Fire", hasServer: false, items: [
     { label: "70 Diamond", sub: "Instan", price: 11000 },
-    { label: "140 Diamond", sub: "Instan", price: 19000 },
-    { label: "355 Diamond", sub: "Instan", price: 49000, bonus: "+15" },
-    { label: "720 Diamond", sub: "Instan", price: 100000 },
+    { label: "140 Diamond", sub: "Instan", price: 22000 },
+    { label: "355 Diamond", sub: "Instan", price: 55000, bonus: "+15" },
+    { label: "720 Diamond", sub: "Instan", price: 108000 },
   ]},
   "pubg-mobile": { name: "PUBG Mobile", hasServer: false, items: [
     { label: "60 UC", sub: "Instan", price: 15000 },
@@ -86,6 +86,36 @@ const CATALOG = {
 const SERVICE_FEE = 2500;
 const rupiah = (n) => "Rp " + n.toLocaleString("id-ID");
 
+/**
+ * Resolves a <select> value (or its visible option text) to a CATALOG
+ * entry even if they don't match exactly — e.g. option value="Free Fire"
+ * or value="freefire" will still find CATALOG["free-fire"]. This is what
+ * was silently failing before: gameSelect.value must match a CATALOG key
+ * character-for-character, and any mismatch (capitalization, spaces,
+ * missing dash, a stray value like "" ) makes CATALOG[value] undefined,
+ * so renderNominals() bails out early and the grid stays empty.
+ */
+function slugify(str) {
+  return String(str || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function resolveGame(rawValue, optionText) {
+  if (CATALOG[rawValue]) return CATALOG[rawValue];
+  const bySlug = slugify(rawValue);
+  if (CATALOG[bySlug]) return CATALOG[bySlug];
+  const byTextSlug = slugify(optionText);
+  if (CATALOG[byTextSlug]) return CATALOG[byTextSlug];
+  // Last resort: match by CATALOG entry's display name.
+  const match = Object.entries(CATALOG).find(
+    ([, g]) => slugify(g.name) === bySlug || slugify(g.name) === byTextSlug
+  );
+  return match ? match[1] : null;
+}
+
 /* ---------- Top-up form (topup.html) ---------- */
 (function initTopupForm() {
   const form = document.getElementById("topupForm");
@@ -96,21 +126,48 @@ const rupiah = (n) => "Rp " + n.toLocaleString("id-ID");
   const nominalGrid = document.getElementById("nominalGrid");
   const stepEls = document.querySelectorAll(".step-nav .step");
   document.getElementById("modeLabel").textContent =
-    APP === 
+    APP_MODE === "demo"
+      ? "Mode: Demo (pengujian, tanpa pembayaran nyata)"
+      : "Mode: Production";
 
   let selectedNominal = null;
+  let currentGame = null;
 
   // Preselect game from ?game= query param
   const params = new URLSearchParams(location.search);
   const preGame = params.get("game");
-  if (preGame && CATALOG[preGame]) gameSelect.value = preGame;
+  if (preGame && resolveGame(preGame)) gameSelect.value = preGame;
 
   function renderNominals() {
-    const game = CATALOG[gameSelect.value];
+    const selectedOption = gameSelect.options[gameSelect.selectedIndex];
+    const game = resolveGame(gameSelect.value, selectedOption?.textContent);
+    currentGame = game;
     nominalGrid.innerHTML = "";
     selectedNominal = null;
     updateSummary();
-    if (!game) return;
+
+    if (!game) {
+      if (gameSelect.value) {
+        // The game was selected but has no matching catalog entry — this
+        // is the exact symptom of an empty nominal list. Surface it
+        // clearly instead of failing silently.
+        console.warn(
+          `[GDevShop] Tidak ada data katalog untuk game "${gameSelect.value}". ` +
+          `Cek apakah value <option> ini punya entri yang cocok di CATALOG (script.js).`
+        );
+        nominalGrid.innerHTML = `<p style="grid-column:1/-1; font-size:13px; color:var(--danger);">
+          Produk untuk game ini belum tersedia di katalog. Hubungi admin.
+        </p>`;
+      }
+      return;
+    }
+
+    if (!game.items || game.items.length === 0) {
+      nominalGrid.innerHTML = `<p style="grid-column:1/-1; font-size:13px; color:var(--danger);">
+        Belum ada nominal untuk game ini.
+      </p>`;
+      return;
+    }
 
     serverField.style.display = game.hasServer ? "block" : "none";
     document.getElementById("serverId").required = game.hasServer;
@@ -160,7 +217,7 @@ const rupiah = (n) => "Rp " + n.toLocaleString("id-ID");
   }
 
   function updateSummary() {
-    const game = CATALOG[gameSelect.value];
+    const game = currentGame;
     document.getElementById("sumGame").textContent = game ? game.name : "—";
     document.getElementById("sumPlayer").textContent = document.getElementById("playerId").value || "—";
     document.getElementById("sumNominal").textContent = selectedNominal ? `${selectedNominal.label} (${rupiah(selectedNominal.price)})` : "—";
@@ -192,7 +249,7 @@ const rupiah = (n) => "Rp " + n.toLocaleString("id-ID");
     const playerField = document.getElementById("playerIdField");
     if (!/^[0-9]{4,15}$/.test(playerIdEl.value.trim())) { setError(playerField, true); valid = false; } else setError(playerField, false);
 
-    const game = CATALOG[gameSelect.value];
+    const game = currentGame;
     if (game && game.hasServer) {
       const serverEl = document.getElementById("serverId");
       if (!/^[0-9]{1,6}$/.test(serverEl.value.trim())) { setError(serverField, true); valid = false; } else setError(serverField, false);
@@ -211,7 +268,7 @@ const rupiah = (n) => "Rp " + n.toLocaleString("id-ID");
 
     if (!valid) return;
 
-    // ---- MODE ONLY ----
+    // ---- DEMO MODE ONLY ----
     // Production build must POST this payload to /api/orders and let the
     // backend create the order + payment intent. The price used for the
     // real charge must always come from the backend catalog lookup, never
@@ -238,19 +295,19 @@ const rupiah = (n) => "Rp " + n.toLocaleString("id-ID");
   });
 })();
 
-/* ---------- order storage helpers (client-side only) ---------- */
+/* ---------- Demo order storage helpers (client-side only) ---------- */
 function saveOrder(order) {
   const all = JSON.parse(localStorage.getItem("gdevshop_demo_orders") || "{}");
   all[order.orderId] = order;
   localStorage.setItem("gdevshop_demo_orders", JSON.stringify(all));
 }
 function getOrder(orderId) {
-  const all = JSON.parse(localStorage.getItem("Muzishop_orders") || "{}");
+  const all = JSON.parse(localStorage.getItem("gdevshop_demo_orders") || "{}");
   return all[orderId] || null;
 }
 function updateOrderStatus(orderId, status) {
-  const all = JSON.parse(localStorage.getItem("Muzishop_orders") || "{}");
-  if (all[orderId]) { all[orderId].status = status; localStorage.setItem("Muzishop_orders", JSON.stringify(all)); }
+  const all = JSON.parse(localStorage.getItem("gdevshop_demo_orders") || "{}");
+  if (all[orderId]) { all[orderId].status = status; localStorage.setItem("gdevshop_demo_orders", JSON.stringify(all)); }
 }
 
 /* ---------- Checkout page ---------- */
@@ -274,6 +331,7 @@ function updateOrderStatus(orderId, status) {
   document.getElementById("coPayment").textContent = order.payment.toUpperCase();
   document.getElementById("coTotal").textContent = rupiah(order.total);
 
+  document.getElementById("demoNotice").style.display = order.mode === "demo" ? "block" : "none";
 
   document.getElementById("simulatePay").addEventListener("click", () => {
     // DEMO ONLY: simulates the webhook confirmation a real payment
@@ -355,4 +413,3 @@ function updateOrderStatus(orderId, status) {
     lookup(preOrder);
   }
 })();
-     
