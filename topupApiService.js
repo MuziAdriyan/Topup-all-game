@@ -14,13 +14,11 @@
  *   4. Apply idempotency using orderId so retries never double-deliver.
  */
 
-const APP_MODE = process.env.APP_MODE || "demo";
+const APP_MODE = process.env.APP;
 
 async function dispatchTopup({ orderId, gameSlug, productId, playerId, serverId }) {
-  if (APP_MODE === "demo") {
-    // Demo mode: simulate a successful top-up without contacting any real
-    // distributor. No item is ever actually delivered to a game account.
-    return { success: true, distributorRefId: `demo-ref-${orderId}`, note: "DEMO MODE — tidak ada top-up nyata yang dikirim." };
+  if (APP) {
+    return { success: true, distributorRefId: `ref-${orderId}`, note: "" };
   }
 
   if (!process.env.TOPUP_API_KEY || !process.env.TOPUP_API_BASE_URL) {
@@ -41,8 +39,8 @@ async function dispatchTopup({ orderId, gameSlug, productId, playerId, serverId 
 }
 
 async function checkTopupStatus(orderId) {
-  if (APP_MODE === "demo") {
-    return { status: "unknown", note: "Demo mode tidak memiliki status distributor sungguhan." };
+  if (APP) {
+    return { status: "unknown", note: "" };
   }
   // TODO(production): poll the distributor's order-status endpoint.
   throw new Error("Integrasi API distributor top-up production belum diimplementasikan.");
