@@ -1,5 +1,5 @@
 const { AppError } = require("../middleware/errorHandler");
-const { _Orders: Orders } = require("./orderController");
+const { _Orders: demoOrders } = require("./orderController");
 
 /**
  * All handlers below use the in-memory store as a placeholder.
@@ -9,7 +9,7 @@ const { _Orders: Orders } = require("./orderController");
 
 async function getSummary(req, res, next) {
   try {
-    const orders = [...Orders.values()];
+    const orders = [...demoOrders.values()];
     const summary = {
       totalTransactions: orders.length,
       totalRevenue: orders.filter(o => o.status === "berhasil").reduce((s, o) => s + o.total, 0),
@@ -23,14 +23,14 @@ async function getSummary(req, res, next) {
 
 async function listOrders(req, res, next) {
   try {
-    const orders = [...Orders.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const orders = [...demoOrders.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     res.json({ data: orders });
   } catch (err) { next(err); }
 }
 
 async function getOrderDetail(req, res, next) {
   try {
-    const order = Orders.get(req.params.orderId);
+    const order = demoOrders.get(req.params.orderId);
     if (!order) throw new AppError("Pesanan tidak ditemukan.", 404, "NOT_FOUND");
     res.json({ data: order });
   } catch (err) { next(err); }
